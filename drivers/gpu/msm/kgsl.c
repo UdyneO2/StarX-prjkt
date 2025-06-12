@@ -19,7 +19,6 @@
 #include <linux/security.h>
 #include <linux/sort.h>
 #include <asm/cacheflush.h>
-
 #include "kgsl_compat.h"
 #include "kgsl_debugfs.h"
 #include "kgsl_device.h"
@@ -27,6 +26,10 @@
 #include "kgsl_reclaim.h"
 #include "kgsl_sync.h"
 #include "kgsl_trace.h"
+
+#if defined(OPLUS_FEATURE_VIRTUAL_RESERVE_MEMORY) && defined(CONFIG_VIRTUAL_RESERVE_MEMORY)
+#include "kgsl_reserve.h"
+#endif
 
 #ifndef arch_mmap_check
 #define arch_mmap_check(addr, len, flags)	(0)
@@ -236,6 +239,7 @@ static struct kgsl_mem_entry *kgsl_mem_entry_create(void)
 		atomic_set(&entry->map_count, 0);
 	}
 
+	atomic_set(&entry->map_count, 0);
 	return entry;
 }
 
@@ -4693,7 +4697,6 @@ static unsigned long _gpu_find_svm(struct kgsl_process_private *private,
 {
 	uint64_t addr = kgsl_mmu_find_svm_region(private->pagetable,
 		(uint64_t) start, (uint64_t)end, (uint64_t) len, align);
-
 	WARN(!IS_ERR_VALUE((unsigned long)addr) && (addr > ULONG_MAX),
 		"Couldn't find range\n");
 
@@ -4706,7 +4709,6 @@ static unsigned long _cpu_get_unmapped_area(unsigned long bottom,
 {
 	struct vm_unmapped_area_info info;
 	unsigned long addr, err;
-
 	info.flags = VM_UNMAPPED_AREA_TOPDOWN;
 	info.low_limit = bottom;
 	info.high_limit = top;
@@ -4853,6 +4855,11 @@ static unsigned long _get_svm_area(struct kgsl_process_private *private,
 	 * Search downwards from the hint first. If that fails we
 	 * must try to search above it.
 	 */
+#if defined(OPLUS_FEATURE_VIRTUAL_RESERVE_MEMORY) && defined(CONFIG_VIRTUAL_RESERVE_MEMORY)
+	result = kgsl_get_unmmaped_area_from_anti_fragment(private, entry, len, align);
+	if (result > 0)
+		return result;
+#endif
 	result = _search_range(private, entry, start, addr, len, align);
 	if (IS_ERR_VALUE(result) && hint != 0)
 		result = _search_range(private, entry, addr, end, len, align);
@@ -4900,7 +4907,11 @@ kgsl_get_unmapped_area(struct file *file, unsigned long addr,
 					       pid_nr(private->pid),
 					       current->mm->mmap_base, addr,
 					       pgoff, len, (int) val);
+
 	}
+#if defined(OPLUS_FEATURE_VIRTUAL_RESERVE_MEMORY) && defined(CONFIG_VIRTUAL_RESERVE_MEMORY)
+	update_oom_pid_and_time(len, val, flags);
+#endif
 
 put:
 	kgsl_mem_entry_put(entry);
@@ -5255,8 +5266,14 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 				PM_QOS_DEFAULT_VALUE);
 	}
 
-	device->events_wq = alloc_workqueue("kgsl-events",
-		WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_HIGHPRI, 0);
+#ifdef VENDOR_EDIT
+    if (sysctl_uifirst_enabled)
+        device->events_wq = alloc_workqueue("kgsl-events",
+            WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_UX, 0);
+#else
+    device->events_wq = alloc_workqueue("kgsl-events",
+        WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_HIGHPRI, 0);
+#endif
 
 	/* Initialize the snapshot engine */
 	kgsl_device_snapshot_init(device);
@@ -5407,13 +5424,19 @@ static int __init kgsl_core_init(void)
 	INIT_LIST_HEAD(&kgsl_driver.process_list);
 
 	INIT_LIST_HEAD(&kgsl_driver.pagetable_list);
+#ifdef VENDOR_EDIT
+    kgsl_driver.workqueue = alloc_workqueue("kgsl-workqueue",
+        WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_UX, 0);
 
+    kgsl_driver.mem_workqueue = alloc_workqueue("kgsl-mementry",
+        WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_UX, 0);
+#else
 	kgsl_driver.workqueue = alloc_workqueue("kgsl-workqueue",
 		WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS, 0);
 
 	kgsl_driver.mem_workqueue = alloc_workqueue("kgsl-mementry",
 		WQ_UNBOUND | WQ_MEM_RECLAIM, 0);
-
+#endif
 	INIT_WORK(&kgsl_driver.mem_work, _flush_mem_workqueue);
 
 	kthread_init_worker(&kgsl_driver.worker);

@@ -965,3 +965,8 @@ config ICNSS_QMI
 	  over QMI channel.
 
 source "drivers/soc/qcom/wcnss/Kconfig"
+
+config OPLUS_FEATURE_MODEM_MINIDUMP
+        bool "Add for oplus modem minidump function"
+        help
+          Add for oplus modem minidump function.
