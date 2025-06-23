@@ -17,7 +17,7 @@ export PATH="$TC_DIR/bin:$PATH"
 export PATH="$TC_DIR/:$PATH" 
 export PATH="$GAS/bin:$PATH" 
 export PATH="$GAS/:$PATH"
-DEFCONFIG="vendor/bengal-perf_defconfig"
+DEFCONFIG="stock_defconfig"
 clear
 echo -e " "
 echo -e "${txtbld}Config:${txtrst} $DEFCONFIG"
@@ -50,7 +50,7 @@ fi
 if [[ $1 == "-cl" || $1 == "--clang" ]]; then
 if [  -d "./out/" ]; then
 echo -e " "
-        git clone https://github.com/1ndev-ui/android_prebuilts_clang_host_linux-x86_clang-6443078 -b 11.0.1 ../clang --depth=1 
+        git clone https://github.com/techyminati/android_prebuilts_clang_host_linux-x86_clang-6443078 -b 11.0.1 ../clang --depth=1 
         git clone https://android.googlesource.com/platform/prebuilts/gas/linux-x86 -b master ../gas --depth=1 
 fi
 echo -e "Clone clang"
