@@ -193,6 +193,8 @@ struct msm_geni_serial_port {
 	void *ipc_log_pwr;
 	void *ipc_log_misc;
 	void *console_log;
+	void *ipc_log_single;
+	void *ipc_log_irqstatus;
 	unsigned int cur_baud;
 	int ioctl_count;
 	int edge_count;
@@ -1462,7 +1464,7 @@ static void msm_geni_serial_set_manual_flow(bool enable,
 	}
 }
 
-static void stop_rx_sequencer(struct uart_port *uport)
+static int stop_rx_sequencer(struct uart_port *uport)
 {
 	unsigned int geni_status;
 	bool timeout, is_irq_masked;
@@ -1480,7 +1482,7 @@ static void stop_rx_sequencer(struct uart_port *uport)
 		IPC_LOG_MSG(port->ipc_log_misc,
 			"%s: RX is Inactive, geni_sts: 0x%x\n",
 						__func__, geni_status);
-		return;
+		return 0;
 	}
 
 	if (!uart_console(uport)) {
@@ -1614,7 +1616,7 @@ exit_rx_seq:
 		return -EBUSY;
 	else
 		return 0;
-
+}
 static void msm_geni_serial_stop_rx(struct uart_port *uport)
 {
 	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);

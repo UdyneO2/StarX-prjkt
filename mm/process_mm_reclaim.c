@@ -131,7 +131,7 @@ cont:
 	/* 
 	 * check whether the reclaim process should cancel
          */
-	reclaimed = reclaim_pages_from_list(&page_list, vma, walk);
+	reclaimed = reclaim_pages_from_list(&page_list, vma);
 
 	rp->nr_reclaimed += reclaimed;
 	rp->nr_to_reclaim -= reclaimed;
