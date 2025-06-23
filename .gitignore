@@ -10,6 +10,8 @@
 # Normal rules (sorted alphabetically)
 out/
 #
+/AnyKernel
+/out
 .*
 *.a
 *.asn1.[ch]
