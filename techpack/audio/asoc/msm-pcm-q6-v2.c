@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
  */
 
 
@@ -1009,6 +1009,7 @@ static int msm_pcm_capture_copy(struct snd_pcm_substream *substream,
 		pr_debug("Offset value = %d\n", offset);
 		if (size == 0 || size < prtd->pcm_count) {
 			memset(bufptr + offset + size, 0, prtd->pcm_count - size);
+<<<<<<< HEAD:techpack/audio/asoc/msm-pcm-q6-v2.c
 			#ifndef OPLUS_BUG_STABILITY
 			size = xfer = prtd->pcm_count;
 			#else /* OPLUS_BUG_STABILITY */
@@ -1019,6 +1020,12 @@ static int msm_pcm_capture_copy(struct snd_pcm_substream *substream,
 				size = xfer = fbytes;
 			}
 			#endif /* OPLUS_BUG_STABILITY */
+=======
+			if (fbytes > prtd->pcm_count)
+				size = xfer = prtd->pcm_count;
+			else
+				size = xfer = fbytes;
+>>>>>>> 023b9913781a24983a00f0e9c0ec17cf5942922b:asoc/msm-pcm-q6-v2.c
 		}
 
 		if (copy_to_user(buf, bufptr+offset, xfer)) {
