@@ -2476,7 +2476,6 @@ static inline int ext4_fname_setup_filename(struct inode *dir,
 #ifdef CONFIG_UNICODE
 	err = ext4_fname_setup_ci_filename(dir, iname, fname);
 #endif
-
 	return err;
 }
 

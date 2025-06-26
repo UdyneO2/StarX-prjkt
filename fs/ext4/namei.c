@@ -1674,7 +1674,6 @@ static struct buffer_head *ext4_find_entry(struct inode *dir,
 		return NULL;
 	if (err)
 		return ERR_PTR(err);
-
 	bh = __ext4_find_entry(dir, &fname, res_dir, inlined, lblk);
 
 	ext4_fname_free_filename(&fname);

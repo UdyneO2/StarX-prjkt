@@ -1154,7 +1154,6 @@ static int qcom_glink_rx_open_ack(struct qcom_glink *glink, unsigned int lcid)
 	}
 
 	CH_INFO(channel, "\n");
-	complete_all(&channel->open_ack);
 
 	return 0;
 }
@@ -1203,6 +1202,7 @@ static int qcom_glink_handle_signals(struct qcom_glink *glink,
 		channel->ept.sig_cb(channel->ept.rpdev, old, channel->rsigs);
 
 	CH_INFO(channel, "old:%d new:%d\n", old, channel->rsigs);
+	complete_all(&channel->open_ack);
 
 	return 0;
 }
@@ -1429,7 +1429,10 @@ static int qcom_glink_announce_create(struct rpmsg_device *rpdev)
 	int iid;
 	int size;
 
+<<<<<<< HEAD
 	CH_INFO(channel, "Entered\n");
+=======
+>>>>>>> 323903110ceab1a8625ee4dd112f4aaf16bff43e
 	if (glink->intentless || !completion_done(&channel->open_ack))
 		return 0;
 

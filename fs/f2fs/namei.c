@@ -503,7 +503,6 @@ static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
 		err = -ENAMETOOLONG;
 		goto out;
 	}
-
 	err = f2fs_prepare_lookup(dir, dentry, &fname);
 	generic_set_encrypted_ci_d_ops(dir, dentry);
 	if (err == -ENOENT)
