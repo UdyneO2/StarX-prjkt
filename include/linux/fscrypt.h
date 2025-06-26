@@ -111,11 +111,8 @@ fscrypt_get_dummy_context(struct super_block *sb)
  * must be cleared.  Note that we don't have to support arbitrary moves of this
  * flag because fscrypt doesn't allow encrypted aliases to be the source or
  * target of a rename().
- */
-static inline void fscrypt_handle_d_move(struct dentry *dentry)
-{
-	dentry->d_flags &= ~DCACHE_ENCRYPTED_NAME;
-}
+ *
+*/
 
 /* crypto.c */
 void fscrypt_enqueue_decrypt_work(struct work_struct *);
