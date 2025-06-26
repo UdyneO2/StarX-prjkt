@@ -1789,7 +1789,6 @@ static int pidfd_create(struct pid *pid)
 
 	return fd;
 }
-
 static void copy_oom_score_adj(u64 clone_flags, struct task_struct *tsk)
 {
 	/* Skip if kernel thread */

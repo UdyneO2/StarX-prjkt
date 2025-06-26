@@ -242,7 +242,6 @@ void ulmk_update_last_kill(void)
 	atomic64_set(&ulmk_kill_jiffies, jiffies);
 }
 #endif
-
 #ifdef CONFIG_NUMA
 /**
  * has_intersects_mems_allowed() - check task eligiblity for kill
